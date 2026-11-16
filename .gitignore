@@ -1,0 +1,16 @@
+# managed by windsor cli
+.windsor/
+.volumes/
+contexts/**/.terraform/
+contexts/**/.tfstate/
+contexts/**/.kube/
+contexts/**/.talos/
+
+# macOS system files
+**/.DS_Store
+
+# IDE user config
+.cursor/
+.vscode/*.local.*
+
+.claude/settings.local.json

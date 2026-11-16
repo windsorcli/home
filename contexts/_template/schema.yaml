@@ -1,0 +1,45 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Windsor Home Blueprint Configuration Schema
+description: Home-specific configuration, merged with the schema that core contributes through the core source.
+type: object
+
+# Core's schema arrives with the core source and merges into this one. This file
+# carries only the keys that home adds. Do not redeclare a core key and do not define $defs.
+
+properties:
+
+  home_assistant:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+        description: Deploy Home Assistant.
+    additionalProperties: false
+
+  jellyfin:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+        description: Deploy Jellyfin.
+    additionalProperties: false
+
+  immich:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+        description: Deploy Immich.
+    additionalProperties: false
+
+  frigate:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+        description: Deploy Frigate.
+    additionalProperties: false

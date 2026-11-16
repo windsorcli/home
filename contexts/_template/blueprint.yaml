@@ -1,0 +1,12 @@
+kind: Blueprint
+apiVersion: blueprints.windsorcli.dev/v1alpha1
+metadata:
+  name: home
+  description: Household apps blueprint layered on top of core
+sources:
+  - name: core
+    # renovate: datasource=docker depName=windsorcli/core package=ghcr.io/windsorcli/core
+    url: oci://ghcr.io/windsorcli/core@sha256:dc9f82743176851cce357201dfe99cb1aee23c7953b2fb6921fe05e973c203db
+    install: true
+terraform: []
+kustomize: []

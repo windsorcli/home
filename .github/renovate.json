@@ -1,0 +1,212 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "github>aquaproj/aqua-renovate-config#2.13.0",
+    ":dependencyDashboard"
+  ],
+  "packageRules": [
+    {
+      "description": "Pin GitHub Actions to specific commit SHAs",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "versioning": "github-tags",
+      "pinDigests": true,
+      "enabled": true,
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash",
+      "matchPackageNames": [
+        "/.*/"
+      ],
+      "labels": [
+        "dependencies"
+      ]
+    },
+    {
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch"
+      ],
+      "enabled": true,
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash",
+      "labels": [
+        "dependencies"
+      ]
+    },
+    {
+      "description": "Pin Docker image digests in Helm release values",
+      "matchDatasources": [
+        "docker"
+      ],
+      "pinDigests": true,
+      "enabled": true,
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash",
+      "labels": [
+        "dependencies"
+      ]
+    },
+    {
+      "description": "Track windsorcli/action@main for edge validation; don't pin or update",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "windsorcli/action"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Track Core's composite actions at @main alongside the CLI; don't pin or update. The pinned tool versions they carry live in Core, so Core's renovate bumps them.",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "windsorcli/core"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "kustomize tags releases as kustomize/vX.Y.Z; strip the prefix so versions compare",
+      "matchPackageNames": [
+        "kubernetes-sigs/kustomize"
+      ],
+      "extractVersion": "^kustomize/(?<version>.+)$"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/ci\\.yaml$/"
+      ],
+      "datasourceTemplate": "github-commits",
+      "packageNameTemplate": "windsorcli/cli",
+      "versioningTemplate": "semver",
+      "matchStrings": [
+        "ref:\\s*(?<currentValue>main)"
+      ]
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/ci\\.yaml$/"
+      ],
+      "matchStrings": [
+        "checks\\.yaml@(?<currentValue>v[\\d\\.]+)",
+        "checkov\\.yaml@(?<currentValue>v[\\d\\.]+)"
+      ],
+      "depNameTemplate": "windsorcli/blueprint",
+      "datasourceTemplate": "github-tags",
+      "packageNameTemplate": "windsorcli/blueprint",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^.*\\.ya?ml$/",
+        "/^.*\\.tf$/",
+        "/^.*\\.tfvars$/"
+      ],
+      "description": "Parse helm annotations with explicit helmRepo",
+      "matchStrings": [
+        "\\s*#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s*depName=(?<depName>[^\\s]+)\\s*package=(?<package>[^\\s]+)\\s+helmRepo=(?<helmRepo>[^\\s]+)[^\\n]*\\n[^\\n]*[:\\s][\"']?(?<currentValue>v?\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9]+)?)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?(?:[\\s\"']|$)",
+        "\\s*#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s*depName=(?<depName>[^\\s]+)\\s*package=(?<package>[^\\s]+)\\s+helmRepo=(?<helmRepo>[^\\s]+)[^\\n]*\\n[^\\n]*[:\\s][\"']?(?<currentValue>v?\\d+\\.\\d+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?(?:[\\s\"']|$)"
+      ],
+      "versioningTemplate": "semver",
+      "datasourceTemplate": "{{datasource}}",
+      "packageNameTemplate": "{{package}}",
+      "depNameTemplate": "{{depName}}",
+      "registryUrlTemplate": "{{helmRepo}}"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^.*\\.ya?ml$/",
+        "/^.*\\.tf$/",
+        "/^.*\\.tfvars$/"
+      ],
+      "description": "Parse non-helm renovate annotations",
+      "matchStrings": [
+        "\\s*#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s*depName=(?<depName>[^\\s]+)\\s*package=(?<package>[^\\s]+)\\s*\\n[^\\n]*[:\\s][\"']?(?<currentValue>v?\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9]+)?)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?(?:[\\s\"']|$)",
+        "\\s*#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s*depName=(?<depName>[^\\s]+)\\s*package=(?<package>[^\\s]+)\\s*\\n[^\\n]*[:\\s][\"']?(?<currentValue>v?\\d+\\.\\d+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?(?:[\\s\"']|$)"
+      ],
+      "versioningTemplate": "semver",
+      "datasourceTemplate": "{{datasource}}",
+      "packageNameTemplate": "{{package}}",
+      "depNameTemplate": "{{depName}}"
+    },
+    {
+      "description": "Handle date-based Docker image tags (e.g., trust-pkg-debian-bookworm)",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^.*\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "\\s*#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s*depName=(?<depName>[^\\s]+)\\s*package=(?<package>[^\\s]+).*\\n[^:]*:\\s*(?<currentValue>\\d{8}(-[^@\\s]+)?)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?"
+      ],
+      "versioningTemplate": "loose",
+      "datasourceTemplate": "{{datasource}}",
+      "packageNameTemplate": "{{package}}",
+      "depNameTemplate": "{{depName}}"
+    },
+    {
+      "description": "Handle complex date-based tags with controller versions (e.g., kube-webhook-certgen)",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^.*\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "\\s*#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s*depName=(?<depName>[^\\s]+)\\s*package=(?<package>[^\\s]+).*\\n[^:]*:\\s*(?<currentValue>v[0-9]{8}-controller-v[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+-g[0-9a-f]+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?"
+      ],
+      "versioningTemplate": "loose",
+      "datasourceTemplate": "{{datasource}}",
+      "packageNameTemplate": "{{package}}",
+      "depNameTemplate": "{{depName}}"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^contexts/_template/facets/.*\\.ya?ml$/",
+        "/^contexts/_template/tests/.*\\.ya?ml$/"
+      ],
+      "description": "Parse helm renovate annotations on CRD layer refs (<name>-<version>)",
+      "matchStrings": [
+        "\\s*#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s*depName=(?<depName>[^\\s]+)\\s*package=(?<package>[^\\s]+)\\s+helmRepo=(?<helmRepo>[^\\s]+)[^\\n]*\\n[^\\n]*-(?<currentValue>v?\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9]+)?)"
+      ],
+      "versioningTemplate": "semver",
+      "datasourceTemplate": "{{datasource}}",
+      "packageNameTemplate": "{{package}}",
+      "depNameTemplate": "{{depName}}",
+      "registryUrlTemplate": "{{helmRepo}}"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^contexts/_template/facets/.*\\.ya?ml$/",
+        "/^contexts/_template/tests/.*\\.ya?ml$/"
+      ],
+      "description": "Parse non-helm renovate annotations on CRD layer refs (<name>-<version>)",
+      "matchStrings": [
+        "\\s*#\\s*renovate:\\s*datasource=(?<datasource>[^\\s]+)\\s*depName=(?<depName>[^\\s]+)\\s*package=(?<package>[^\\s]+)\\s*\\n[^\\n]*-(?<currentValue>v?\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9]+)?)"
+      ],
+      "versioningTemplate": "semver",
+      "datasourceTemplate": "{{datasource}}",
+      "packageNameTemplate": "{{package}}",
+      "depNameTemplate": "{{depName}}"
+    }
+  ],
+  "platformAutomerge": true,
+  "addLabels": [
+    "dependencies"
+  ],
+  "labels": [
+    "dependencies"
+  ]
+}

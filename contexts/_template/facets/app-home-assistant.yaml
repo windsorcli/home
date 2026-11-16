@@ -1,0 +1,7 @@
+kind: Facet
+apiVersion: blueprints.windsorcli.dev/v1alpha1
+metadata:
+  name: app-home-assistant
+  description: Home Assistant, Mosquitto, and Zigbee2MQTT (placeholder, opt-in)
+
+when: home_assistant.enabled == true

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "kubernetes": {
+      "command": "kubernetes-mcp-server",
+      "args": [],
+      "env": {
+        "KUBECONFIG": "contexts/local/.kube/config"
+      }
+    }
+  }
+}
