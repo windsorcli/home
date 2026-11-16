@@ -1,0 +1,7 @@
+kind: Facet
+apiVersion: blueprints.windsorcli.dev/v1alpha1
+metadata:
+  name: app-immich
+  description: Immich photo library (placeholder, opt-in)
+
+when: immich.enabled == true

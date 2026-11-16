@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/aquaproj/aqua/main/json-schema/aqua-yaml.json
+# aqua - Declarative CLI Version Manager
+# https://aquaproj.github.io/
+# checksum:
+#   enabled: true
+#   require_checksum: true
+#   supported_envs:
+#   - all
+registries:
+  - type: standard
+    ref: v4.562.0 # renovate: depName=aquaproj/aqua-registry
+packages:
+  - name: hashicorp/terraform@v1.12.2
+  - name: siderolabs/talos@v1.14.1
+  - name: kubernetes/kubectl@v1.37.0
+  - name: kubernetes-sigs/kustomize@kustomize/v5.8.1
+  - name: go-task/task@v3.53.1
+  - name: helm/helm@v4.3.0
+  - name: fluxcd/flux2@v2.9.5
+  - name: derailed/k9s@v0.51.0
+  - name: evilmartians/lefthook@v2.1.14
+  - name: mikefarah/yq@v4.53.6
+

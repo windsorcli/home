@@ -1,0 +1,7 @@
+kind: Facet
+apiVersion: blueprints.windsorcli.dev/v1alpha1
+metadata:
+  name: app-jellyfin
+  description: Jellyfin media server (placeholder, opt-in)
+
+when: jellyfin.enabled == true

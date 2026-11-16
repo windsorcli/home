@@ -1,0 +1,8 @@
+# app-frigate.yaml facet tests
+# The facet is a placeholder. The case checks that the schema accepts the opt-in key.
+
+cases:
+  - name: accepts frigate.enabled
+    values:
+      frigate:
+        enabled: true

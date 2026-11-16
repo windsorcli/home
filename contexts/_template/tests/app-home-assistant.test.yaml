@@ -1,0 +1,8 @@
+# app-home-assistant.yaml facet tests
+# The facet is a placeholder. The case checks that the schema accepts the opt-in key.
+
+cases:
+  - name: accepts home_assistant.enabled
+    values:
+      home_assistant:
+        enabled: true

@@ -1,0 +1,82 @@
+# =============================================================================
+# CI workflow
+# =============================================================================
+# Runs on push-to-main, tagged releases, PRs against main, and manual dispatch.
+#   code-checks: yamllint and shellcheck
+#   tests:       blueprint facet tests
+#
+# Runner prep and tool installs come from Core's composite actions
+# (windsorcli/core/.github/actions/*). The Windsor CLI comes from windsorcli/action.
+# Both are referenced at @main, so a version bump in Core reaches this repo at once.
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  WINDSOR_PROJECT_ROOT: ${{ github.workspace }}
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+
+  code-checks:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.x'
+
+      - name: Run yamllint
+        run: |
+          pip install yamllint
+          yamllint .
+
+      - name: Run shellcheck
+        run: |
+          sudo apt-get install -y shellcheck
+          shell_files=$(find . -name "*.sh" -print)
+          if [ -n "$shell_files" ]; then
+            echo "$shell_files" | xargs shellcheck
+          else
+            echo "No shell scripts found to check"
+          fi
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup tools
+        uses: windsorcli/core/.github/actions/setup-tools@main
+        with:
+          tools: terraform,task,yq
+
+      - name: Install Windsor CLI
+        uses: windsorcli/action@main
+        with:
+          ref: main
+          context: local
+
+      - name: Run Tests
+        run: task test
