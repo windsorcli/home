@@ -20,6 +20,8 @@ Skills are in `.claude/skills/`. Claude Code, Cursor, and other tools find them 
 
 7. **Prose.** Write all prose in Simplified Technical English.
 
+8. **Planning docs.** `home` keeps no ADRs, plans, roadmaps, or release charters. Put them in `windsorcli/sdlc`: the roadmap in [`roadmap/home.md`](https://github.com/windsorcli/sdlc/blob/main/roadmap/home.md), release charters in [`releases/home-vX.Y.Z.md`](https://github.com/windsorcli/sdlc/tree/main/releases), and ADRs in [`adrs/home/`](https://github.com/windsorcli/sdlc/tree/main/adrs/home).
+
 ## Key commands
 
 ```
