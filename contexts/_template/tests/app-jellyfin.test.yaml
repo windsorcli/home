@@ -17,6 +17,23 @@ cases:
         enabled: true
         storage_class: replicated
 
+  - name: accepts jellyfin.storage_class single
+    values:
+      dns:
+        private_domain: home.example.com
+      jellyfin:
+        enabled: true
+        storage_class: single
+
+  - name: rejects a jellyfin.storage_class outside the enum
+    values:
+      dns:
+        private_domain: home.example.com
+      jellyfin:
+        enabled: true
+        storage_class: fast
+    expectError: true
+
   - name: rejects an unknown jellyfin key
     values:
       dns:

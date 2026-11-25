@@ -17,6 +17,23 @@ cases:
         enabled: true
         storage_class: replicated
 
+  - name: accepts home_assistant.storage_class single
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        storage_class: single
+
+  - name: rejects a home_assistant.storage_class outside the enum
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        storage_class: fast
+    expectError: true
+
   - name: rejects an unknown home_assistant key
     values:
       dns:

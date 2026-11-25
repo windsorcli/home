@@ -17,7 +17,10 @@ properties:
         description: Deploy Home Assistant.
       storage_class:
         type: string
-        description: StorageClass for each Home Assistant volume. Unset uses the cluster default.
+        enum:
+          - single
+          - replicated
+        description: StorageClass for each Home Assistant volume. Unset uses the cluster default, single. replicated needs a csi driver that creates it, such as longhorn HA or mayastor.
     additionalProperties: false
 
   jellyfin:
@@ -29,7 +32,10 @@ properties:
         description: Deploy Jellyfin.
       storage_class:
         type: string
-        description: StorageClass for each Jellyfin volume. Unset uses the cluster default.
+        enum:
+          - single
+          - replicated
+        description: StorageClass for each Jellyfin volume. Unset uses the cluster default, single. replicated needs a csi driver that creates it, such as longhorn HA or mayastor.
     additionalProperties: false
 
   immich:
@@ -41,7 +47,10 @@ properties:
         description: Deploy Immich.
       storage_class:
         type: string
-        description: StorageClass for each Immich volume. Unset uses the cluster default.
+        enum:
+          - single
+          - replicated
+        description: StorageClass for each Immich volume. Unset uses the cluster default, single. replicated needs a csi driver that creates it, such as longhorn HA or mayastor.
     additionalProperties: false
 
   frigate:
@@ -53,5 +62,8 @@ properties:
         description: Deploy Frigate.
       storage_class:
         type: string
-        description: StorageClass for each Frigate volume. Unset uses the cluster default.
+        enum:
+          - single
+          - replicated
+        description: StorageClass for each Frigate volume. Unset uses the cluster default, single. replicated needs a csi driver that creates it, such as longhorn HA or mayastor.
     additionalProperties: false
