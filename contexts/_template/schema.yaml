@@ -15,6 +15,9 @@ properties:
         type: boolean
         default: false
         description: Deploy Home Assistant.
+      storage_class:
+        type: string
+        description: StorageClass for each Home Assistant volume. Unset uses the cluster default.
     additionalProperties: false
 
   jellyfin:
@@ -24,6 +27,9 @@ properties:
         type: boolean
         default: false
         description: Deploy Jellyfin.
+      storage_class:
+        type: string
+        description: StorageClass for each Jellyfin volume. Unset uses the cluster default.
     additionalProperties: false
 
   immich:
@@ -33,6 +39,9 @@ properties:
         type: boolean
         default: false
         description: Deploy Immich.
+      storage_class:
+        type: string
+        description: StorageClass for each Immich volume. Unset uses the cluster default.
     additionalProperties: false
 
   frigate:
@@ -42,4 +51,7 @@ properties:
         type: boolean
         default: false
         description: Deploy Frigate.
+      storage_class:
+        type: string
+        description: StorageClass for each Frigate volume. Unset uses the cluster default.
     additionalProperties: false

@@ -5,3 +5,8 @@ metadata:
   description: Home Assistant, Mosquitto, and Zigbee2MQTT (placeholder, opt-in)
 
 when: home_assistant.enabled == true
+
+requires:
+  - paths:
+      - dns.private_domain
+    message: Home Assistant publishes an HTTPRoute on the internal gateway, which core provisions only when dns.private_domain is set.

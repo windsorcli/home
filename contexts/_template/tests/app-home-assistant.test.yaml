@@ -1,8 +1,39 @@
 # app-home-assistant.yaml facet tests
-# The facet is a placeholder. The case checks that the schema accepts the opt-in key.
+# The facet takes an optional storage_class and needs dns.private_domain for its host name.
 
 cases:
-  - name: accepts home_assistant.enabled
+  - name: accepts home_assistant.enabled with a private domain
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+
+  - name: accepts a home_assistant.storage_class override
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        storage_class: replicated
+
+  - name: rejects an unknown home_assistant key
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        node_selector:
+          disk: ssd
+    expectError: true
+
+  - name: fails composition without dns.private_domain
     values:
       home_assistant:
         enabled: true
+    expectError: true
+
+  - name: skips the domain check when home_assistant is disabled
+    values:
+      home_assistant:
+        enabled: false
