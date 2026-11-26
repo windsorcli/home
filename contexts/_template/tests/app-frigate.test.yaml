@@ -1,8 +1,56 @@
 # app-frigate.yaml facet tests
-# The facet is a placeholder. The case checks that the schema accepts the opt-in key.
+# The facet takes an optional storage_class and needs dns.private_domain for its host name.
 
 cases:
-  - name: accepts frigate.enabled
+  - name: accepts frigate.enabled with a private domain
+    values:
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+
+  - name: accepts a frigate.storage_class override
+    values:
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+        storage_class: replicated
+
+  - name: accepts frigate.storage_class single
+    values:
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+        storage_class: single
+
+  - name: rejects a frigate.storage_class outside the enum
+    values:
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+        storage_class: fast
+    expectError: true
+
+  - name: rejects an unknown frigate key
+    values:
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+        node_selector:
+          disk: ssd
+    expectError: true
+
+  - name: fails composition without dns.private_domain
     values:
       frigate:
         enabled: true
+    expectError: true
+
+  - name: skips the domain check when frigate is disabled
+    values:
+      frigate:
+        enabled: false

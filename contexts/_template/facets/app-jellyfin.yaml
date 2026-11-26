@@ -5,3 +5,8 @@ metadata:
   description: Jellyfin media server (placeholder, opt-in)
 
 when: jellyfin.enabled == true
+
+requires:
+  - paths:
+      - dns.private_domain
+    message: Jellyfin publishes an HTTPRoute on the internal gateway, which core provisions only when dns.private_domain is set.

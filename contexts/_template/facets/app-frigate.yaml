@@ -5,3 +5,8 @@ metadata:
   description: Frigate camera recorder (placeholder, opt-in)
 
 when: frigate.enabled == true
+
+requires:
+  - paths:
+      - dns.private_domain
+    message: Frigate publishes an HTTPRoute on the internal gateway, which core provisions only when dns.private_domain is set.

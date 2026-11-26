@@ -1,8 +1,56 @@
 # app-immich.yaml facet tests
-# The facet is a placeholder. The case checks that the schema accepts the opt-in key.
+# The facet takes an optional storage_class and needs dns.private_domain for its host name.
 
 cases:
-  - name: accepts immich.enabled
+  - name: accepts immich.enabled with a private domain
+    values:
+      dns:
+        private_domain: home.example.com
+      immich:
+        enabled: true
+
+  - name: accepts an immich.storage_class override
+    values:
+      dns:
+        private_domain: home.example.com
+      immich:
+        enabled: true
+        storage_class: replicated
+
+  - name: accepts immich.storage_class single
+    values:
+      dns:
+        private_domain: home.example.com
+      immich:
+        enabled: true
+        storage_class: single
+
+  - name: rejects a immich.storage_class outside the enum
+    values:
+      dns:
+        private_domain: home.example.com
+      immich:
+        enabled: true
+        storage_class: fast
+    expectError: true
+
+  - name: rejects an unknown immich key
+    values:
+      dns:
+        private_domain: home.example.com
+      immich:
+        enabled: true
+        node_selector:
+          disk: ssd
+    expectError: true
+
+  - name: fails composition without dns.private_domain
     values:
       immich:
         enabled: true
+    expectError: true
+
+  - name: skips the domain check when immich is disabled
+    values:
+      immich:
+        enabled: false
