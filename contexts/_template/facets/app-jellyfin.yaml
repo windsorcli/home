@@ -10,3 +10,11 @@ requires:
   - paths:
       - dns.private_domain
     message: Jellyfin publishes an HTTPRoute on the internal gateway, which core provisions only when dns.private_domain is set.
+  - when: (jellyfin.storage_class ?? 'single') == 'replicated' && !((cluster.storage.driver ?? 'openebs') == 'mayastor' || ((cluster.storage.driver ?? 'openebs') == 'longhorn' && (topology ?? 'single-node') == 'ha'))
+    message: jellyfin.storage_class is replicated, but this cluster has no replicated class. Use a replicated storage driver, or remove jellyfin.storage_class.
+  - when: (jellyfin.gateway ?? 'internal') == 'external' || (jellyfin.gateway ?? 'internal') == 'both'
+    message: jellyfin.gateway is external or both, but home v0.1.0 has no external gateway, because home ADR 0001 forbids dns.public_domain. Set jellyfin.gateway to internal, or remove it.
+
+config:
+  - name: jellyfin_gateway
+    value: "${jellyfin.gateway ?? 'internal'}"

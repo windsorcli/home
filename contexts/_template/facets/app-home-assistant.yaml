@@ -10,3 +10,15 @@ requires:
   - paths:
       - dns.private_domain
     message: Home Assistant publishes an HTTPRoute on the internal gateway, which core provisions only when dns.private_domain is set.
+  - when: (home_assistant.storage_class ?? 'single') == 'replicated' && !((cluster.storage.driver ?? 'openebs') == 'mayastor' || ((cluster.storage.driver ?? 'openebs') == 'longhorn' && (topology ?? 'single-node') == 'ha'))
+    message: home_assistant.storage_class is replicated, but this cluster has no replicated class. Use a replicated storage driver, or remove home_assistant.storage_class.
+  - when: (home_assistant.gateway ?? 'internal') == 'external' || (home_assistant.gateway ?? 'internal') == 'both'
+    message: home_assistant.gateway is external or both, but home v0.1.0 has no external gateway, because home ADR 0001 forbids dns.public_domain. Set home_assistant.gateway to internal, or remove it.
+  - when: (home_assistant.zigbee2mqtt.gateway ?? home_assistant.gateway ?? 'internal') == 'external' || (home_assistant.zigbee2mqtt.gateway ?? home_assistant.gateway ?? 'internal') == 'both'
+    message: home_assistant.zigbee2mqtt.gateway is external or both, but home v0.1.0 has no external gateway, because home ADR 0001 forbids dns.public_domain. Set home_assistant.zigbee2mqtt.gateway to internal, or remove it.
+
+config:
+  - name: home_assistant_gateway
+    value: "${home_assistant.gateway ?? 'internal'}"
+  - name: zigbee2mqtt_gateway
+    value: "${home_assistant.zigbee2mqtt.gateway ?? home_assistant.gateway ?? 'internal'}"

@@ -15,6 +15,24 @@ properties:
         type: boolean
         default: false
         description: Deploy Home Assistant.
+      gateway:
+        type: string
+        enum:
+          - internal
+          - external
+          - both
+        description: Gateway that carries each Home Assistant route. Unset means internal. external and both fail composition in home v0.1.0, because home ADR 0001 forbids dns.public_domain.
+      zigbee2mqtt:
+        type: object
+        properties:
+          gateway:
+            type: string
+            enum:
+              - internal
+              - external
+              - both
+            description: Gateway that carries the Zigbee2MQTT route. Unset reads home_assistant.gateway. external and both fail composition in home v0.1.0, because home ADR 0001 forbids dns.public_domain.
+        additionalProperties: false
       storage_class:
         type: string
         enum:
@@ -30,6 +48,13 @@ properties:
         type: boolean
         default: false
         description: Deploy Jellyfin.
+      gateway:
+        type: string
+        enum:
+          - internal
+          - external
+          - both
+        description: Gateway that carries each Jellyfin route. Unset means internal. external and both fail composition in home v0.1.0, because home ADR 0001 forbids dns.public_domain.
       storage_class:
         type: string
         enum:
@@ -45,6 +70,13 @@ properties:
         type: boolean
         default: false
         description: Deploy Immich.
+      gateway:
+        type: string
+        enum:
+          - internal
+          - external
+          - both
+        description: Gateway that carries each Immich route. Unset means internal. external and both fail composition in home v0.1.0, because home ADR 0001 forbids dns.public_domain.
       storage_class:
         type: string
         enum:
@@ -60,6 +92,13 @@ properties:
         type: boolean
         default: false
         description: Deploy Frigate.
+      gateway:
+        type: string
+        enum:
+          - internal
+          - external
+          - both
+        description: Gateway that carries each Frigate route. Unset means internal. external and both fail composition in home v0.1.0, because home ADR 0001 forbids dns.public_domain.
       storage_class:
         type: string
         enum:
