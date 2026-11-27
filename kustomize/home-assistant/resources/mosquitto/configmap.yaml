@@ -7,6 +7,7 @@ metadata:
 data:
   mosquitto.conf: |
     listener 1883
+    # Anonymous access; the Service is ClusterIP only, so it is reachable inside the cluster.
     allow_anonymous true
     persistence true
     persistence_location /mosquitto/data/
