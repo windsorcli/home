@@ -1,9 +1,118 @@
 # app-immich.yaml facet tests
-# The facet takes optional storage_class and gateway keys and needs dns.private_domain for its host name.
+# The facet deploys the workloads, the vector database, the internal route, and the volumes.
 
 cases:
+  - name: deploys the workloads, database, and internal route
+    values:
+      database:
+        postgres:
+          enabled: true
+      dns:
+        private_domain: home.example.com
+      immich:
+        enabled: true
+    expect:
+      kustomize:
+        - name: app-immich
+          path: immich
+          components:
+            - route
+          substitutions:
+            immich_domain: home.example.com
+    exclude:
+      kustomize:
+        - name: app-immich-external
+
+  - name: omits the workloads when immich is disabled
+    values:
+      dns:
+        private_domain: home.example.com
+      immich:
+        enabled: false
+    exclude:
+      kustomize:
+        - name: app-immich
+
+  - name: fails composition without the core postgres service
+    values:
+      dns:
+        private_domain: home.example.com
+      immich:
+        enabled: true
+    expectError: true
+
+  - name: fails composition when database.postgres.enabled is false
+    values:
+      database:
+        postgres:
+          enabled: false
+      dns:
+        private_domain: home.example.com
+      immich:
+        enabled: true
+    expectError: true
+
+  - name: leaves the storage class out when unset
+    values:
+      database:
+        postgres:
+          enabled: true
+      dns:
+        private_domain: home.example.com
+      immich:
+        enabled: true
+    expect:
+      kustomize:
+        - name: app-immich
+          components:
+            - route
+
+  - name: sets the storage class on each volume and the database when single
+    values:
+      database:
+        postgres:
+          enabled: true
+      dns:
+        private_domain: home.example.com
+      immich:
+        enabled: true
+        storage_class: single
+    expect:
+      kustomize:
+        - name: app-immich
+          components:
+            - storage-class
+            - route
+          substitutions:
+            immich_storage_class: single
+
+  - name: sets the storage class on each volume and the database when replicated
+    values:
+      cluster:
+        storage:
+          driver: mayastor
+      database:
+        postgres:
+          enabled: true
+      dns:
+        private_domain: home.example.com
+      immich:
+        enabled: true
+        storage_class: replicated
+    expect:
+      kustomize:
+        - name: app-immich
+          components:
+            - storage-class
+            - route
+          substitutions:
+            immich_storage_class: replicated
+
   - name: accepts immich.enabled with a private domain
     values:
+      database:
+        postgres:
+          enabled: true
       dns:
         private_domain: home.example.com
       immich:
@@ -11,6 +120,9 @@ cases:
 
   - name: accepts an immich.storage_class override
     values:
+      database:
+        postgres:
+          enabled: true
       cluster:
         storage:
           driver: mayastor
@@ -22,6 +134,9 @@ cases:
 
   - name: accepts immich.storage_class single
     values:
+      database:
+        postgres:
+          enabled: true
       dns:
         private_domain: home.example.com
       immich:
@@ -30,6 +145,9 @@ cases:
 
   - name: rejects a immich.storage_class outside the enum
     values:
+      database:
+        postgres:
+          enabled: true
       dns:
         private_domain: home.example.com
       immich:
@@ -39,6 +157,9 @@ cases:
 
   - name: rejects an unknown immich key
     values:
+      database:
+        postgres:
+          enabled: true
       dns:
         private_domain: home.example.com
       immich:
@@ -49,17 +170,26 @@ cases:
 
   - name: fails composition without dns.private_domain
     values:
+      database:
+        postgres:
+          enabled: true
       immich:
         enabled: true
     expectError: true
 
   - name: skips the domain check when immich is disabled
     values:
+      database:
+        postgres:
+          enabled: true
       immich:
         enabled: false
 
   - name: accepts immich.gateway internal
     values:
+      database:
+        postgres:
+          enabled: true
       dns:
         private_domain: home.example.com
       immich:
@@ -68,6 +198,9 @@ cases:
 
   - name: rejects immich.gateway outside the enum
     values:
+      database:
+        postgres:
+          enabled: true
       dns:
         private_domain: home.example.com
       immich:
@@ -77,6 +210,9 @@ cases:
 
   - name: fails composition when immich.gateway is external
     values:
+      database:
+        postgres:
+          enabled: true
       dns:
         private_domain: home.example.com
       immich:
@@ -86,6 +222,9 @@ cases:
 
   - name: fails composition when immich.gateway is both
     values:
+      database:
+        postgres:
+          enabled: true
       dns:
         private_domain: home.example.com
       immich:
@@ -95,6 +234,9 @@ cases:
 
   - name: skips the gateway check when immich is disabled
     values:
+      database:
+        postgres:
+          enabled: true
       dns:
         private_domain: home.example.com
       immich:
@@ -103,6 +245,9 @@ cases:
 
   - name: fails composition for immich.storage_class replicated on the default driver
     values:
+      database:
+        postgres:
+          enabled: true
       dns:
         private_domain: home.example.com
       immich:
@@ -112,6 +257,9 @@ cases:
 
   - name: fails composition for immich.storage_class replicated on longhorn without ha
     values:
+      database:
+        postgres:
+          enabled: true
       cluster:
         storage:
           driver: longhorn
@@ -124,6 +272,9 @@ cases:
 
   - name: accepts immich.storage_class replicated on longhorn with ha
     values:
+      database:
+        postgres:
+          enabled: true
       topology: ha
       cluster:
         storage:
@@ -136,6 +287,9 @@ cases:
 
   - name: accepts immich.storage_class replicated on mayastor
     values:
+      database:
+        postgres:
+          enabled: true
       cluster:
         storage:
           driver: mayastor
@@ -147,6 +301,9 @@ cases:
 
   - name: fails composition for immich.storage_class replicated on openebs
     values:
+      database:
+        postgres:
+          enabled: true
       cluster:
         storage:
           driver: openebs
