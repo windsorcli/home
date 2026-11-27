@@ -1,7 +1,82 @@
 # app-jellyfin.yaml facet tests
-# The facet takes optional storage_class and gateway keys and needs dns.private_domain for its host name.
+# The facet deploys the workload, its GPU request, its internal route, and its volumes.
 
 cases:
+  - name: deploys the workload and the internal route
+    values:
+      dns:
+        private_domain: home.example.com
+      jellyfin:
+        enabled: true
+    expect:
+      kustomize:
+        - name: app-jellyfin
+          path: jellyfin
+          components:
+            - route
+          substitutions:
+            jellyfin_domain: home.example.com
+    exclude:
+      kustomize:
+        - name: app-jellyfin-external
+
+  - name: omits the workload when jellyfin is disabled
+    values:
+      dns:
+        private_domain: home.example.com
+      jellyfin:
+        enabled: false
+    exclude:
+      kustomize:
+        - name: app-jellyfin
+
+  - name: leaves the storage class out when unset
+    values:
+      dns:
+        private_domain: home.example.com
+      jellyfin:
+        enabled: true
+    expect:
+      kustomize:
+        - name: app-jellyfin
+          components:
+            - route
+
+  - name: sets the storage class on each volume when single
+    values:
+      dns:
+        private_domain: home.example.com
+      jellyfin:
+        enabled: true
+        storage_class: single
+    expect:
+      kustomize:
+        - name: app-jellyfin
+          components:
+            - storage-class
+            - route
+          substitutions:
+            jellyfin_storage_class: single
+
+  - name: sets the storage class on each volume when replicated
+    values:
+      cluster:
+        storage:
+          driver: mayastor
+      dns:
+        private_domain: home.example.com
+      jellyfin:
+        enabled: true
+        storage_class: replicated
+    expect:
+      kustomize:
+        - name: app-jellyfin
+          components:
+            - storage-class
+            - route
+          substitutions:
+            jellyfin_storage_class: replicated
+
   - name: accepts jellyfin.enabled with a private domain
     values:
       dns:
