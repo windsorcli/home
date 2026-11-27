@@ -236,3 +236,87 @@ cases:
         enabled: true
         gateway: external
     expectError: true
+
+  - name: deploys the three workloads with the common component
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+    expect:
+      flux:
+        - name: home-assistant
+          path: home-assistant
+          resources:
+            - timeout: 10m
+              interval: 5m
+              components:
+                - common
+                - home-assistant
+                - mosquitto
+                - zigbee2mqtt
+
+  - name: adds the single storage class to each volume
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        storage_class: single
+    expect:
+      flux:
+        - name: home-assistant
+          resources:
+            - components:
+                - common
+                - home-assistant
+                - mosquitto
+                - zigbee2mqtt
+                - storage/single
+
+  - name: adds the replicated storage class to each volume
+    values:
+      cluster:
+        storage:
+          driver: mayastor
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        storage_class: replicated
+    expect:
+      flux:
+        - name: home-assistant
+          resources:
+            - components:
+                - common
+                - home-assistant
+                - mosquitto
+                - zigbee2mqtt
+                - storage/replicated
+
+  - name: publishes the routes under the private domain
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+    expect:
+      flux:
+        - name: home-assistant
+          resources:
+            - name: routes
+              components:
+                - gateway
+              substitutions:
+                home_assistant_domain: home.example.com
+
+  - name: deploys nothing when home_assistant is disabled
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: false
+    exclude:
+      flux:
+        - name: home-assistant

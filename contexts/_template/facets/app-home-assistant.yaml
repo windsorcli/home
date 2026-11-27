@@ -2,7 +2,7 @@ kind: Facet
 apiVersion: blueprints.windsorcli.dev/v1alpha1
 metadata:
   name: app-home-assistant
-  description: Home Assistant, Mosquitto, and Zigbee2MQTT (placeholder, opt-in)
+  description: Home Assistant, Mosquitto, and Zigbee2MQTT (opt-in)
 
 when: home_assistant.enabled == true
 
@@ -22,3 +22,26 @@ config:
     value: "${home_assistant.gateway ?? 'internal'}"
   - name: zigbee2mqtt_gateway
     value: "${home_assistant.zigbee2mqtt.gateway ?? home_assistant.gateway ?? 'internal'}"
+
+# Flux
+# =============================================================================
+# Core installs before home, so the csi and gateway layers exist when these apply.
+# Zigbee2MQTT needs devices.enabled and a devices.serial.zigbee key in core.
+flux:
+  - name: home-assistant
+    path: home-assistant
+    resources:
+      - components:
+          - common
+          - home-assistant
+          - mosquitto
+          - zigbee2mqtt
+          - "${home_assistant.storage_class == 'single' ? 'storage/single' : ''}"
+          - "${home_assistant.storage_class == 'replicated' ? 'storage/replicated' : ''}"
+        timeout: 10m
+        interval: 5m
+      - name: routes
+        components:
+          - gateway
+        substitutions:
+          home_assistant_domain: ${dns.private_domain}
