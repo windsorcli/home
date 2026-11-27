@@ -1,5 +1,5 @@
 # app-home-assistant.yaml facet tests
-# The facet takes an optional storage_class and needs dns.private_domain for its host name.
+# The facet takes optional storage_class and gateway keys and needs dns.private_domain for its host name.
 
 cases:
   - name: accepts home_assistant.enabled with a private domain
@@ -11,6 +11,9 @@ cases:
 
   - name: accepts a home_assistant.storage_class override
     values:
+      cluster:
+        storage:
+          driver: mayastor
       dns:
         private_domain: home.example.com
       home_assistant:
@@ -54,3 +57,182 @@ cases:
     values:
       home_assistant:
         enabled: false
+
+  - name: accepts home_assistant.gateway internal
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        gateway: internal
+
+  - name: rejects home_assistant.gateway outside the enum
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        gateway: lan
+    expectError: true
+
+  - name: fails composition when home_assistant.gateway is external
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        gateway: external
+    expectError: true
+
+  - name: fails composition when home_assistant.gateway is both
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        gateway: both
+    expectError: true
+
+  - name: accepts zigbee2mqtt.gateway internal with home_assistant.gateway unset
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        zigbee2mqtt:
+          gateway: internal
+
+  - name: accepts zigbee2mqtt.gateway and home_assistant.gateway both internal
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        gateway: internal
+        zigbee2mqtt:
+          gateway: internal
+
+  - name: rejects home_assistant.zigbee2mqtt.gateway outside the enum
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        zigbee2mqtt:
+          gateway: lan
+    expectError: true
+
+  - name: fails composition when home_assistant.zigbee2mqtt.gateway is external
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        zigbee2mqtt:
+          gateway: external
+    expectError: true
+
+  - name: fails composition when home_assistant.zigbee2mqtt.gateway is both
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        zigbee2mqtt:
+          gateway: both
+    expectError: true
+
+  - name: fails composition when zigbee2mqtt.gateway is external and home_assistant.gateway is internal
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        gateway: internal
+        zigbee2mqtt:
+          gateway: external
+    expectError: true
+
+  - name: home_assistant.gateway external fails even when zigbee2mqtt.gateway is internal
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        gateway: external
+        zigbee2mqtt:
+          gateway: internal
+    expectError: true
+
+  - name: skips the gateway check when home_assistant is disabled
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: false
+        gateway: external
+
+  - name: fails composition for home_assistant.storage_class replicated on the default driver
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        storage_class: replicated
+    expectError: true
+
+  - name: fails composition for home_assistant.storage_class replicated on longhorn without ha
+    values:
+      cluster:
+        storage:
+          driver: longhorn
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        storage_class: replicated
+    expectError: true
+
+  - name: accepts home_assistant.storage_class replicated on longhorn with ha
+    values:
+      topology: ha
+      cluster:
+        storage:
+          driver: longhorn
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        storage_class: replicated
+
+  - name: accepts home_assistant.storage_class replicated on mayastor
+    values:
+      cluster:
+        storage:
+          driver: mayastor
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        storage_class: replicated
+
+  - name: fails composition for home_assistant.storage_class replicated on openebs
+    values:
+      cluster:
+        storage:
+          driver: openebs
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        storage_class: replicated
+    expectError: true
+
+  - name: fails composition when home_assistant.gateway is external and zigbee2mqtt.gateway is unset
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        gateway: external
+    expectError: true

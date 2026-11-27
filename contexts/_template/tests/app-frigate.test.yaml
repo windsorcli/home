@@ -1,5 +1,5 @@
 # app-frigate.yaml facet tests
-# The facet takes an optional storage_class and needs dns.private_domain for its host name.
+# The facet takes optional storage_class and gateway keys and needs dns.private_domain for its host name.
 
 cases:
   - name: accepts frigate.enabled with a private domain
@@ -11,6 +11,9 @@ cases:
 
   - name: accepts a frigate.storage_class override
     values:
+      cluster:
+        storage:
+          driver: mayastor
       dns:
         private_domain: home.example.com
       frigate:
@@ -54,3 +57,102 @@ cases:
     values:
       frigate:
         enabled: false
+
+  - name: accepts frigate.gateway internal
+    values:
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+        gateway: internal
+
+  - name: rejects frigate.gateway outside the enum
+    values:
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+        gateway: lan
+    expectError: true
+
+  - name: fails composition when frigate.gateway is external
+    values:
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+        gateway: external
+    expectError: true
+
+  - name: fails composition when frigate.gateway is both
+    values:
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+        gateway: both
+    expectError: true
+
+  - name: skips the gateway check when frigate is disabled
+    values:
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: false
+        gateway: external
+
+  - name: fails composition for frigate.storage_class replicated on the default driver
+    values:
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+        storage_class: replicated
+    expectError: true
+
+  - name: fails composition for frigate.storage_class replicated on longhorn without ha
+    values:
+      cluster:
+        storage:
+          driver: longhorn
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+        storage_class: replicated
+    expectError: true
+
+  - name: accepts frigate.storage_class replicated on longhorn with ha
+    values:
+      topology: ha
+      cluster:
+        storage:
+          driver: longhorn
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+        storage_class: replicated
+
+  - name: accepts frigate.storage_class replicated on mayastor
+    values:
+      cluster:
+        storage:
+          driver: mayastor
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+        storage_class: replicated
+
+  - name: fails composition for frigate.storage_class replicated on openebs
+    values:
+      cluster:
+        storage:
+          driver: openebs
+      dns:
+        private_domain: home.example.com
+      frigate:
+        enabled: true
+        storage_class: replicated
+    expectError: true

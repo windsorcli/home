@@ -10,3 +10,11 @@ requires:
   - paths:
       - dns.private_domain
     message: Immich publishes an HTTPRoute on the internal gateway, which core provisions only when dns.private_domain is set.
+  - when: (immich.storage_class ?? 'single') == 'replicated' && !((cluster.storage.driver ?? 'openebs') == 'mayastor' || ((cluster.storage.driver ?? 'openebs') == 'longhorn' && (topology ?? 'single-node') == 'ha'))
+    message: immich.storage_class is replicated, but this cluster has no replicated class. Use a replicated storage driver, or remove immich.storage_class.
+  - when: (immich.gateway ?? 'internal') == 'external' || (immich.gateway ?? 'internal') == 'both'
+    message: immich.gateway is external or both, but home v0.1.0 has no external gateway, because home ADR 0001 forbids dns.public_domain. Set immich.gateway to internal, or remove it.
+
+config:
+  - name: immich_gateway
+    value: "${immich.gateway ?? 'internal'}"
