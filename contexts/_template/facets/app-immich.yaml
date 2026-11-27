@@ -2,7 +2,7 @@ kind: Facet
 apiVersion: blueprints.windsorcli.dev/v1alpha1
 metadata:
   name: app-immich
-  description: Immich photo library (placeholder, opt-in)
+  description: Immich photo library with a CloudNativePG vector database (opt-in)
 
 when: immich.enabled == true
 
@@ -14,7 +14,21 @@ requires:
     message: immich.storage_class is replicated, but this cluster has no replicated class. Use a replicated storage driver, or remove immich.storage_class.
   - when: (immich.gateway ?? 'internal') == 'external' || (immich.gateway ?? 'internal') == 'both'
     message: immich.gateway is external or both, but home v0.1.0 has no external gateway, because home ADR 0001 forbids dns.public_domain. Set immich.gateway to internal, or remove it.
+  - when: database.postgres.enabled != true
+    message: Immich stores its data in a CloudNativePG cluster, which the core database layer runs only when database.postgres.enabled is true. Set database.postgres.enabled to true.
 
 config:
   - name: immich_gateway
     value: "${immich.gateway ?? 'internal'}"
+
+kustomize:
+  - name: app-immich
+    path: immich
+    components:
+      - "${immich.storage_class != null ? 'storage-class' : ''}"
+      - route
+    substitutions:
+      immich_domain: ${dns.private_domain}
+      immich_storage_class: "${immich.storage_class ?? ''}"
+    timeout: 15m
+    interval: 5m

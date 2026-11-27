@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-server
+  namespace: app-immich
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: immich-server
+  template:
+    metadata:
+      labels:
+        app: immich-server
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: immich-server
+          # renovate: datasource=docker depName=ghcr.io/immich-app/immich-server
+          image: ghcr.io/immich-app/immich-server:v3.4.2@sha256:fc880c1bf665b4aab1e74c15e56ab871225989cd546536e6b77e771869af06bd
+          env:
+            - name: DB_HOSTNAME
+              value: immich-db-rw
+            - name: DB_DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: immich-db-app
+                  key: dbname
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: immich-db-app
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: immich-db-app
+                  key: password
+            - name: DB_VECTOR_EXTENSION
+              value: vectorchord
+            - name: REDIS_HOSTNAME
+              value: immich-valkey
+            - name: IMMICH_MACHINE_LEARNING_URL
+              value: http://immich-machine-learning:3003
+          ports:
+            - name: http
+              containerPort: 2283
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          readinessProbe:
+            httpGet:
+              path: /api/server/ping
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /api/server/ping
+              port: http
+            initialDelaySeconds: 60
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              memory: 4Gi
+          volumeMounts:
+            - name: library
+              mountPath: /data
+      volumes:
+        - name: library
+          persistentVolumeClaim:
+            claimName: immich-library
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-server
+  namespace: app-immich
+spec:
+  type: ClusterIP
+  selector:
+    app: immich-server
+  ports:
+    - name: http
+      port: 2283
+      targetPort: http

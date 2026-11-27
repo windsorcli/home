@@ -1,0 +1,28 @@
+# CNPG creates the immich-db-app secret and the immich-db-rw Service.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: immich-db
+  namespace: app-immich
+spec:
+  instances: 1
+  # renovate: datasource=docker depName=ghcr.io/tensorchord/cloudnative-vectorchord
+  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:17.11-1.1.1@sha256:bb7eb8442f76b1e74911f28585019a77022911f8cfa2ddcfb166ea6af85abd09
+  postgresql:
+    shared_preload_libraries:
+      - vchord.so
+  storage:
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+  bootstrap:
+    initdb:
+      database: immich
+      owner: immich
+      postInitApplicationSQL:
+        - CREATE EXTENSION IF NOT EXISTS vchord CASCADE
+        - CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE
