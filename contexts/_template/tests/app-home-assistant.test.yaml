@@ -227,3 +227,12 @@ cases:
         enabled: true
         storage_class: replicated
     expectError: true
+
+  - name: fails composition when home_assistant.gateway is external and zigbee2mqtt.gateway is unset
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        gateway: external
+    expectError: true
