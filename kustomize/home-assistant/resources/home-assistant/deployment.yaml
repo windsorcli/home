@@ -16,6 +16,9 @@ spec:
       labels:
         app.kubernetes.io/name: home-assistant
     spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: home-assistant
           # renovate: datasource=docker depName=ghcr.io/home-assistant/home-assistant package=ghcr.io/home-assistant/home-assistant
@@ -32,6 +35,8 @@ spec:
               memory: 512Mi
             limits:
               memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
           readinessProbe:
             httpGet:
               path: /manifest.json

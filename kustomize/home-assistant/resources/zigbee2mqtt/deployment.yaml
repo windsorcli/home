@@ -16,6 +16,9 @@ spec:
       labels:
         app.kubernetes.io/name: zigbee2mqtt
     spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: zigbee2mqtt
           # renovate: datasource=docker depName=ghcr.io/koenkk/zigbee2mqtt package=ghcr.io/koenkk/zigbee2mqtt
@@ -26,6 +29,18 @@ spec:
           env:
             - name: ZIGBEE2MQTT_CONFIG_MQTT_SERVER
               value: mqtt://mosquitto:1883
+            - name: ZIGBEE2MQTT_CONFIG_MQTT_USER
+              value: zigbee2mqtt
+            - name: ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mqtt-zigbee2mqtt
+                  key: password
+            - name: ZIGBEE2MQTT_CONFIG_FRONTEND_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: zigbee2mqtt-frontend
+                  key: auth-token
             - name: ZIGBEE2MQTT_CONFIG_SERIAL_PORT
               value: /dev/zigbee
             - name: ZIGBEE2MQTT_CONFIG_FRONTEND_ENABLED
@@ -39,6 +54,8 @@ spec:
             limits:
               memory: 256Mi
               devices.windsorcli.dev/zigbee: "1"
+          securityContext:
+            allowPrivilegeEscalation: false
           readinessProbe:
             tcpSocket:
               port: http

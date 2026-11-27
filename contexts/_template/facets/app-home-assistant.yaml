@@ -23,6 +23,23 @@ config:
   - name: zigbee2mqtt_gateway
     value: "${home_assistant.zigbee2mqtt.gateway ?? home_assistant.gateway ?? 'internal'}"
 
+# Terraform
+# =============================================================================
+# One generated secret for each value the user leaves unset.
+terraform:
+  # Generates the Home Assistant MQTT password unless set by home_assistant.mqtt.homeassistant_password.
+  - name: home-assistant-mqtt-password
+    path: home-assistant/generated-secret
+    when: (home_assistant.mqtt.homeassistant_password ?? '') == ''
+  # Generates the Zigbee2MQTT MQTT password unless set by home_assistant.mqtt.zigbee2mqtt_password.
+  - name: zigbee2mqtt-mqtt-password
+    path: home-assistant/generated-secret
+    when: (home_assistant.mqtt.zigbee2mqtt_password ?? '') == ''
+  # Generates the Zigbee2MQTT frontend token unless set by home_assistant.zigbee2mqtt.auth_token.
+  - name: zigbee2mqtt-auth-token
+    path: home-assistant/generated-secret
+    when: (home_assistant.zigbee2mqtt.auth_token ?? '') == ''
+
 # Flux
 # =============================================================================
 # Core installs before home, so the csi and gateway layers exist when these apply.
@@ -45,3 +62,41 @@ flux:
           - gateway
         substitutions:
           home_assistant_domain: ${dns.private_domain}
+
+  # Secrets, from the user's value or the generated one.
+  - name: home-assistant
+    when: (home_assistant.mqtt.homeassistant_password ?? '') != ''
+    secrets:
+      mqtt-homeassistant:
+        data:
+          password: ${home_assistant.mqtt.homeassistant_password}
+  - name: home-assistant
+    when: (home_assistant.mqtt.homeassistant_password ?? '') == ''
+    secrets:
+      mqtt-homeassistant:
+        data:
+          password: ${terraform_output('home-assistant-mqtt-password', 'value')}
+  - name: home-assistant
+    when: (home_assistant.mqtt.zigbee2mqtt_password ?? '') != ''
+    secrets:
+      mqtt-zigbee2mqtt:
+        data:
+          password: ${home_assistant.mqtt.zigbee2mqtt_password}
+  - name: home-assistant
+    when: (home_assistant.mqtt.zigbee2mqtt_password ?? '') == ''
+    secrets:
+      mqtt-zigbee2mqtt:
+        data:
+          password: ${terraform_output('zigbee2mqtt-mqtt-password', 'value')}
+  - name: home-assistant
+    when: (home_assistant.zigbee2mqtt.auth_token ?? '') != ''
+    secrets:
+      zigbee2mqtt-frontend:
+        data:
+          auth-token: ${home_assistant.zigbee2mqtt.auth_token}
+  - name: home-assistant
+    when: (home_assistant.zigbee2mqtt.auth_token ?? '') == ''
+    secrets:
+      zigbee2mqtt-frontend:
+        data:
+          auth-token: ${terraform_output('zigbee2mqtt-auth-token', 'value')}

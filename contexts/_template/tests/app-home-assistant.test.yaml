@@ -320,3 +320,112 @@ cases:
     exclude:
       flux:
         - name: home-assistant
+
+  - name: generates each secret when no value is set
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+    terraformOutputs:
+      home-assistant-mqtt-password:
+        value: generated-ha
+      zigbee2mqtt-mqtt-password:
+        value: generated-z2m
+      zigbee2mqtt-auth-token:
+        value: generated-token
+    expect:
+      terraform:
+        - name: home-assistant-mqtt-password
+          path: home-assistant/generated-secret
+        - name: zigbee2mqtt-mqtt-password
+          path: home-assistant/generated-secret
+        - name: zigbee2mqtt-auth-token
+          path: home-assistant/generated-secret
+      flux:
+        - name: home-assistant
+          secrets:
+            mqtt-homeassistant:
+              data:
+                password: "${terraform_output('home-assistant-mqtt-password', 'value')}"
+            mqtt-zigbee2mqtt:
+              data:
+                password: "${terraform_output('zigbee2mqtt-mqtt-password', 'value')}"
+            zigbee2mqtt-frontend:
+              data:
+                auth-token: "${terraform_output('zigbee2mqtt-auth-token', 'value')}"
+
+  - name: uses supplied secrets and generates none
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        mqtt:
+          homeassistant_password: ha-supplied
+          zigbee2mqtt_password: z2m-supplied
+        zigbee2mqtt:
+          auth_token: token-supplied
+    expect:
+      flux:
+        - name: home-assistant
+          secrets:
+            mqtt-homeassistant:
+              data:
+                password: "${home_assistant.mqtt.homeassistant_password}"
+            mqtt-zigbee2mqtt:
+              data:
+                password: "${home_assistant.mqtt.zigbee2mqtt_password}"
+            zigbee2mqtt-frontend:
+              data:
+                auth-token: "${home_assistant.zigbee2mqtt.auth_token}"
+    exclude:
+      terraform:
+        - name: home-assistant-mqtt-password
+        - name: zigbee2mqtt-mqtt-password
+        - name: zigbee2mqtt-auth-token
+
+  - name: generates only the secrets that are not supplied
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        zigbee2mqtt:
+          auth_token: token-supplied
+    terraformOutputs:
+      home-assistant-mqtt-password:
+        value: generated-ha
+      zigbee2mqtt-mqtt-password:
+        value: generated-z2m
+    expect:
+      terraform:
+        - name: home-assistant-mqtt-password
+          path: home-assistant/generated-secret
+        - name: zigbee2mqtt-mqtt-password
+          path: home-assistant/generated-secret
+    exclude:
+      terraform:
+        - name: zigbee2mqtt-auth-token
+
+  - name: skips secret generation when home_assistant is disabled
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: false
+    exclude:
+      terraform:
+        - name: home-assistant-mqtt-password
+        - name: zigbee2mqtt-mqtt-password
+        - name: zigbee2mqtt-auth-token
+
+  - name: rejects an unknown home_assistant.mqtt key
+    values:
+      dns:
+        private_domain: home.example.com
+      home_assistant:
+        enabled: true
+        mqtt:
+          anonymous: true
+    expectError: true

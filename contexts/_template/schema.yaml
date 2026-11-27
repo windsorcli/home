@@ -32,6 +32,22 @@ properties:
               - external
               - both
             description: Gateway that carries the Zigbee2MQTT route. Unset reads home_assistant.gateway. external and both fail composition in home v0.1.0, because home ADR 0001 forbids dns.public_domain.
+          auth_token:
+            type: string
+            sensitive: true
+            description: Token that the Zigbee2MQTT web UI requires. Unset generates one, and the zigbee2mqtt-frontend Secret holds it.
+        additionalProperties: false
+      mqtt:
+        type: object
+        properties:
+          homeassistant_password:
+            type: string
+            sensitive: true
+            description: Password of the Mosquitto user homeassistant. Unset generates one, and the mqtt-homeassistant Secret holds it.
+          zigbee2mqtt_password:
+            type: string
+            sensitive: true
+            description: Password of the Mosquitto user zigbee2mqtt. Unset generates one, and the mqtt-zigbee2mqtt Secret holds it.
         additionalProperties: false
       storage_class:
         type: string

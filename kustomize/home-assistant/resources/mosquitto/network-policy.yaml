@@ -1,0 +1,23 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mosquitto
+  namespace: home-assistant
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mosquitto
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: home-assistant
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: zigbee2mqtt
+      ports:
+        - port: 1883
+          protocol: TCP
