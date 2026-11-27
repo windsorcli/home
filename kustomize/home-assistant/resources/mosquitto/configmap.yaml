@@ -1,0 +1,26 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mosquitto
+  namespace: home-assistant
+data:
+  mosquitto.conf: |
+    listener 1883
+    allow_anonymous false
+    password_file /mosquitto/auth/passwd
+    acl_file /mosquitto/auth/acl
+    persistence true
+    persistence_location /mosquitto/data/
+    log_dest stdout
+  acl: |
+    user homeassistant
+    topic readwrite homeassistant/#
+    topic read zigbee2mqtt/#
+    topic write zigbee2mqtt/+/set
+    topic write zigbee2mqtt/+/get
+    topic write zigbee2mqtt/bridge/request/#
+
+    user zigbee2mqtt
+    topic readwrite homeassistant/#
+    topic readwrite zigbee2mqtt/#
